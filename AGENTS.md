@@ -101,7 +101,7 @@ Always include a `description` on every field — the LLM reads these:
 
 ```ts
 parameters: Type.Object({
-  agentPath: Type.String({ description: "Absolute path to the agent folder" }),
+  agentName: Type.String({ description: "Name of the agent folder inside ~/.openclaw/agents/" }),
   to:        Type.String({ description: "Recipient email address" }),
   account:   Type.Optional(Type.String({ description: "GOG account or alias" })),
 })

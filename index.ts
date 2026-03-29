@@ -3,8 +3,8 @@ import { Type } from "@sinclair/typebox";
 import { execFile } from "node:child_process";
 import { promisify } from "node:util";
 import { mkdtemp, rm, access } from "node:fs/promises";
-import { tmpdir } from "node:os";
-import { join, basename, resolve } from "node:path";
+import { tmpdir, homedir } from "node:os";
+import { join } from "node:path";
 import { constants } from "node:fs";
 
 const execFileAsync = promisify(execFile);
@@ -21,8 +21,8 @@ export default {
         "Requires gogcli (gog) to be installed and authenticated. " +
         "The agent folder will be zipped and sent as an attachment.",
       parameters: Type.Object({
-        agentPath: Type.String({
-          description: "Absolute path to the agent folder to zip and send",
+        agentName: Type.String({
+          description: "Name of the agent folder inside ~/.openclaw/agents/",
         }),
         to: Type.String({
           description: "Recipient email address",
@@ -48,14 +48,16 @@ export default {
         ),
       }),
       async execute(_id, params) {
-        const agentPath = resolve(params.agentPath);
-        const folderName = basename(agentPath);
+        const agentName = params.agentName;
+        const agentsDir = join(homedir(), ".openclaw", "agents");
+        const agentPath = join(agentsDir, agentName);
+        const folderName = agentName;
         const subject = params.subject ?? `Agent: ${folderName}`;
         const body =
           params.body ??
           `Attached is the agent "${folderName}" packaged as a zip file.`;
 
-        // Validate the agent folder exists
+        // Validate the agent folder exists inside ~/.openclaw/agents/
         try {
           await access(agentPath, constants.R_OK);
         } catch {
@@ -63,7 +65,7 @@ export default {
             content: [
               {
                 type: "text",
-                text: `Error: Agent folder not found or not readable: ${agentPath}`,
+                text: `Error: Agent "${agentName}" not found in ${agentsDir}. Check available agents with: ls ~/.openclaw/agents/`,
               },
             ],
             isError: true,
@@ -174,6 +176,13 @@ export default {
           // Always clean up temp files
           await rm(tmpDir, { recursive: true, force: true }).catch(() => {});
         }
+      },
+    });
+
+    api.registerService({
+      id: "send-agent",
+      start: () => {
+        api.logger.info("send-agent: registered");
       },
     });
   },
