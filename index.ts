@@ -1,4 +1,4 @@
-import { definePluginEntry } from "openclaw/plugin-sdk/plugin-entry";
+import type { OpenClawPluginApi } from "openclaw/plugin-sdk";
 import { Type } from "@sinclair/typebox";
 import { execFile } from "node:child_process";
 import { promisify } from "node:util";
@@ -9,11 +9,11 @@ import { constants } from "node:fs";
 
 const execFileAsync = promisify(execFile);
 
-export default definePluginEntry({
+export default {
   id: "send-agent",
   name: "Send Agent via Email",
   description: "Zips an agent folder and sends it via Gmail using gogcli",
-  register(api) {
+  register(api: OpenClawPluginApi) {
     api.registerTool({
       name: "send_agent",
       description:
@@ -177,4 +177,4 @@ export default definePluginEntry({
       },
     });
   },
-});
+};

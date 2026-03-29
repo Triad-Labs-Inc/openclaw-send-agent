@@ -67,12 +67,17 @@ pnpm test -- openclaw-send-agent/
   import { execFile } from "node:child_process";
   import { join, basename } from "node:path";
   ```
-- Import from focused OpenClaw SDK subpaths, never from the monolithic root:
+- Import the plugin API type from `"openclaw/plugin-sdk"`. Export a plain
+  object literal — do **not** use `definePluginEntry`:
   ```ts
-  // correct
+  // correct — works with host openclaw <=2026.3.13
+  import type { OpenClawPluginApi } from "openclaw/plugin-sdk";
+  export default {
+    id: "my-plugin",
+    register(api: OpenClawPluginApi) { ... },
+  };
+  // wrong — openclaw/plugin-sdk/plugin-entry does not exist on host <=2026.3.13
   import { definePluginEntry } from "openclaw/plugin-sdk/plugin-entry";
-  // wrong — deprecated, will be removed
-  import { definePluginEntry } from "openclaw/plugin-sdk";
   ```
 - Third-party imports come after SDK imports, before Node built-ins.
 
@@ -140,7 +145,7 @@ report it gracefully.
 ## Architecture
 
 ```
-index.ts                  # sole entry point; calls definePluginEntry + registerTool
+index.ts                  # sole entry point; exports plugin object + registers tool
 openclaw.plugin.json      # manifest: id, name, description, configSchema
 package.json              # name must match manifest id; openclaw as peerDependency
 ```
@@ -153,7 +158,7 @@ additional times inside the same `register(api)` function.
 ## Critical Constraints
 
 - **ID consistency:** `package.json` `name`, `openclaw.plugin.json` `id`, and
-  the `id` field passed to `definePluginEntry` must all match exactly.
+  the `id` field in the exported plugin object must all match exactly.
   Mismatches cause load-time warnings and may prevent the plugin from loading.
 
 - **peerDependency on openclaw:** Keep `"openclaw": "*"` in `peerDependencies`.
