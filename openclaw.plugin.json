@@ -1,0 +1,15 @@
+{
+  "id": "send-agent",
+  "name": "Send Agent via Email",
+  "description": "Zips an agent folder and sends it via Gmail using gogcli",
+  "configSchema": {
+    "type": "object",
+    "properties": {
+      "gogAccount": {
+        "type": "string",
+        "description": "The GOG_ACCOUNT email to send from (optional, uses default if omitted)"
+      }
+    },
+    "additionalProperties": false
+  }
+}

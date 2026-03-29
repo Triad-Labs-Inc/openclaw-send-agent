@@ -1,0 +1,11 @@
+{
+  "name": "@yourorg/openclaw-send-agent",
+  "version": "1.0.0",
+  "type": "module",
+  "openclaw": {
+    "extensions": ["./index.ts"]
+  },
+  "dependencies": {
+    "@sinclair/typebox": "^0.32.0"
+  }
+}
